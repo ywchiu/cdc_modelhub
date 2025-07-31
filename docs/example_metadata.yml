@@ -1,0 +1,113 @@
+# 模型 Metadata 範例檔案
+# 請參考此格式建立您的 metadata 檔案
+
+team_name: "國立台灣大學統計系"
+team_abbr: "NTU-Stats"
+model_name: "SEIR Ensemble Model"
+model_abbr: "SEIR-Ensemble"
+model_version: "2.1.0"
+
+# 團隊成員資訊
+model_contributors:
+  - name: "王小明"
+    affiliation: "國立台灣大學統計系"
+    email: "wang@ntu.edu.tw"
+    orcid: "0000-0000-0000-0000"  # 選填
+  - name: "李小華"
+    affiliation: "國立台灣大學統計系"
+    email: "lee@ntu.edu.tw"
+
+# 模型描述
+methods: |
+  本模型使用 SEIR (Susceptible-Exposed-Infected-Recovered) 區室模型
+  作為基礎架構，並整合以下元素：
+  
+  1. 機器學習方法進行參數估計
+  2. 氣象資料 (溫度、濕度、降雨量)
+  3. 人口流動數據 (Google Mobility Reports)
+  4. 疫苗接種覆蓋率
+  5. 防疫政策影響係數
+  
+  使用貝氏方法進行不確定性量化，並透過集成學習
+  整合多個子模型的預測結果。
+
+# 資料來源
+data_inputs: |
+  主要資料來源：
+  - 疾管署 COVID-19 每日確診數 (2020/01/01 - 現在)
+  - 中央氣象局氣象觀測資料
+  - Google 人口流動報告
+  - 疫苗接種統計 (疾管署)
+  - 政府防疫措施時間序列
+  
+  資料更新頻率：每日
+  資料處理：7天移動平均平滑處理
+
+# 模型假設與限制
+assumptions: |
+  主要假設：
+  1. 人口結構穩定 (不考慮出生死亡)
+  2. 地理區域內人口混合均勻
+  3. 潛伏期固定為 5.1 天
+  4. 感染期固定為 7 天
+  5. 康復後具有免疫力 (不考慮重複感染)
+  
+  模型限制：
+  - 不考慮變種病毒影響
+  - 未包含醫療量能限制
+  - 假設檢測率穩定
+
+# 驗證方法
+validation: |
+  模型驗證採用以下方法：
+  1. 歷史資料回測 (2020-2024)
+  2. 交叉驗證 (5-fold)
+  3. 與基準模型比較 (naive, ARIMA)
+  4. 預測區間覆蓋率評估
+  
+  評估指標：
+  - Mean Absolute Error (MAE)
+  - Root Mean Square Error (RMSE)  
+  - Mean Absolute Percentage Error (MAPE)
+  - 95% 預測區間覆蓋率
+
+# 計算資源
+computational_resources: |
+  - 硬體：Intel Xeon Gold 6248R (48 cores)
+  - 記憶體：256 GB RAM
+  - 軟體：R 4.3.0, Stan 2.32, tidyverse
+  - 執行時間：約 2 小時 (包含 MCMC 取樣)
+
+# 引用資訊
+citation: |
+  Wang, X. M., Lee, H. C., et al. (2024). 
+  "An integrated SEIR-ML approach for COVID-19 forecasting in Taiwan." 
+  Journal of Epidemiological Modeling, 15(3), 123-145.
+  DOI: 10.1000/example.doi
+
+# 授權資訊
+license: "CC-BY-4.0"
+
+# 網站或代碼庫連結
+website: "https://covid-model.stat.ntu.edu.tw"
+code_repository: "https://github.com/ntu-stats/covid-seir-model"
+
+# 模型性能指標 (歷史表現)
+historical_performance:
+  mae_1week: 123.5
+  mae_2week: 187.2
+  mae_3week: 245.8
+  mae_4week: 298.1
+  coverage_95: 0.94  # 95% 預測區間覆蓋率
+
+# 備註
+notes: |
+  本模型每週進行重新校準，並根據最新資料更新參數。
+  
+  重要更新記錄：
+  - v2.1.0: 加入 Omicron 變種病毒修正係數
+  - v2.0.5: 整合疫苗效力衰退模型
+  - v2.0.0: 重大架構升級，改用貝氏方法
+  
+  聯絡資訊：
+  如有任何問題，請聯繫 wang@ntu.edu.tw

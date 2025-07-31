@@ -1,0 +1,55 @@
+# CODEOWNERS 檔案
+# 此檔案定義了各個檔案和目錄的程式碼擁有者
+# 當有 Pull Request 影響這些檔案時，會自動指派審查者
+
+# 全域擁有者 - 所有檔案都需要 maintainers 團隊審核
+* @cdc-modeling-hub/maintainers
+
+# 資料檔案需要資料管理員審核
+/data-processed/ @cdc-modeling-hub/data-managers
+/validation/ @cdc-modeling-hub/data-managers
+*.csv @cdc-modeling-hub/data-managers
+
+# 文件需要文件團隊審核  
+*.md @cdc-modeling-hub/doc-team
+/docs/ @cdc-modeling-hub/doc-team
+
+# GitHub 設定需要管理員審核
+/.github/ @cdc-modeling-hub/admin-team
+/.github/workflows/ @cdc-modeling-hub/admin-team
+
+# 網站相關檔案需要前端團隊審核
+/templates/ @cdc-modeling-hub/frontend-team
+*.html @cdc-modeling-hub/frontend-team
+*.css @cdc-modeling-hub/frontend-team
+*.js @cdc-modeling-hub/frontend-team
+/_quarto.yml @cdc-modeling-hub/frontend-team
+
+# R 腳本需要 R 開發團隊審核
+*.R @cdc-modeling-hub/r-developers
+/scripts/ @cdc-modeling-hub/r-developers
+
+# 備份和復原腳本需要系統管理員審核
+/scripts/backup* @cdc-modeling-hub/sysadmin-team
+/scripts/disaster_recovery* @cdc-modeling-hub/sysadmin-team
+DISASTER_RECOVERY.md @cdc-modeling-hub/sysadmin-team
+
+# 安全相關檔案需要安全團隊審核
+/security/ @cdc-modeling-hub/security-team
+*.key @cdc-modeling-hub/security-team
+*.pem @cdc-modeling-hub/security-team
+
+# 特定模型的擁有者 (範例)
+/forecasts/*ntu*/ @team-ntu
+/forecasts/*ncku*/ @team-ncku
+/forecasts/*nthu*/ @team-nthu
+
+# 設定檔需要管理員審核
+*.yml @cdc-modeling-hub/admin-team
+*.yaml @cdc-modeling-hub/admin-team
+*.json @cdc-modeling-hub/admin-team
+*.toml @cdc-modeling-hub/admin-team
+
+# 授權和法律文件需要法務審核
+LICENSE @cdc-modeling-hub/legal-team
+CONTRIBUTING.md @cdc-modeling-hub/legal-team
