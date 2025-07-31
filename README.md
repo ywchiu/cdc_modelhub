@@ -1,5 +1,9 @@
 # 零成本用 GitHub 打造傳染病模型 Modeling Hub
 
+## 實作步驟
+
+[實作步驟](https://github.com/ywchiu/cdc_modelhub/blob/main/INSTRUCTION.md)
+
 ## 課程大綱
 
 ### 🔧 第一階段：基礎概念 (45分鐘)
