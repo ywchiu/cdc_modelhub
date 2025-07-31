@@ -1,0 +1,51 @@
+name: 每週資料整合
+
+on:
+  schedule:
+    # 每週一早上 9 點 (UTC+8)
+    - cron: '0 1 * * 1'
+  workflow_dispatch:  # 允許手動觸發
+
+jobs:
+  weekly-integration:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: 設定 R 環境
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: '4.3.0'
+    
+    - name: 安裝 R 套件
+      run: |
+        install.packages(c("tidyverse", "gh"))
+      shell: Rscript {0}
+    
+    - name: 整合本週預測
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        week_number=$(date +%V)
+        year=$(date +%Y)
+        
+        echo "整合第 ${week_number} 週預測資料"
+        
+        # 執行整合腳本
+        Rscript scripts/integrate_weekly.R \
+          --year $year \
+          --week $week_number
+          
+    - name: 產生週報
+      run: |
+        Rscript scripts/generate_weekly_report.R
+        
+    - name: 發布結果
+      run: |
+        # 提交整合結果
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add reports/
+        git commit -m "Weekly integration W$(date +%V)" || echo "No changes to commit"
+        git push

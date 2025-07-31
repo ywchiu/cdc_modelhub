@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>疾管署建模中心</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #2c3e50; 
+            text-align: center;
+        }
+        .update-time {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 疾管署建模中心</h1>
+        <p class="update-time">最後更新時間: <span id="update-time"></span></p>
+        <p>歡迎來到台灣傳染病預測模型平台</p>
+    </div>
+    
+    <script>
+        document.getElementById('update-time').textContent = new Date().toLocaleString('zh-TW');
+    </script>
+</body>
+</html>

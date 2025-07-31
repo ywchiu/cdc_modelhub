@@ -1,0 +1,52 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "台灣傳染病預測模型平台"
+  navbar:
+    background: primary
+    left:
+      - href: index.qmd
+        text: 首頁
+      - href: about.qmd
+        text: 關於
+      - href: guide.qmd
+        text: 提交指南
+      - href: results.qmd
+        text: 預測結果
+    right:
+      - icon: github
+        href: https://github.com/cdc-modeling-hub
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    lang: zh-TW
+    grid:
+      sidebar-width: 250px
+      body-width: 900px
+      margin-width: 200px
+    fontsize: 1.1em
+    linestretch: 1.6
+    mainfont: "Noto Sans TC"
+    include-in-header:
+      - text: |
+          <meta name="description" 
+                content="台灣傳染病預測模型協作平台，提供即時疫情預測資訊">
+          <meta name="keywords" 
+                content="傳染病,預測,模型,疾管署,CDC">
+          <meta property="og:title" 
+                content="台灣傳染病預測平台">
+          <meta property="og:image" 
+                content="https://cdc-modeling-hub.github.io/preview.png">
+          <!-- Google tag (gtag.js) -->
+          <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+          <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-XXXXXXXXXX');
+          </script>

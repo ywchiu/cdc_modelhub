@@ -1,0 +1,64 @@
+name: 自動備份
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每日凌晨 2 點
+  workflow_dispatch:     # 手動觸發
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 設定備份日期
+      run: |
+        echo "BACKUP_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+        echo "BACKUP_TIME=$(date +%H%M%S)" >> $GITHUB_ENV
+        
+    - name: 備份所有 Repositories
+      env:
+        GITHUB_TOKEN: ${{ secrets.BACKUP_TOKEN }}
+      run: |
+        # 取得所有 repos
+        repos=$(gh api orgs/cdc-modeling-hub/repos --paginate -q '.[].name')
+        
+        # 建立備份目錄
+        mkdir -p backups/${{ env.BACKUP_DATE }}
+        
+        # 備份每個 repo
+        for repo in $repos; do
+          echo "備份 $repo..."
+          git clone --mirror https://github.com/cdc-modeling-hub/$repo.git
+          tar czf backups/${{ env.BACKUP_DATE }}/${repo}_${{ env.BACKUP_TIME }}.tar.gz ${repo}.git
+          rm -rf ${repo}.git
+        done
+    
+    - name: 上傳至 GitHub Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: backup-${{ env.BACKUP_DATE }}
+        path: backups/
+        retention-days: 30
+        
+    - name: 上傳至 GitHub Release
+      if: github.event.schedule == '0 2 * * 0'  # 週日
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: backup-${{ env.BACKUP_DATE }}
+        name: Weekly Backup ${{ env.BACKUP_DATE }}
+        files: backups/**/*.tar.gz
+        
+    - name: 同步至外部儲存 (選用)
+      env:
+        RCLONE_CONFIG: ${{ secrets.RCLONE_CONFIG }}
+      run: |
+        # 安裝 rclone
+        curl https://rclone.org/install.sh | sudo bash
+        
+        # 設定 rclone
+        mkdir -p ~/.config/rclone
+        echo "$RCLONE_CONFIG" > ~/.config/rclone/rclone.conf
+        
+        # 上傳到 Google Drive / OneDrive / S3
+        rclone copy backups/ remote:cdc-github-backups/
+      if: env.RCLONE_CONFIG != ''

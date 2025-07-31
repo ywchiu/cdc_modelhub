@@ -1,0 +1,150 @@
+name: 驗證預測提交
+
+# 觸發條件
+on:
+  pull_request:
+    paths:
+      - 'data-processed/**'
+      - 'metadata/**'
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 檢出程式碼
+      uses: actions/checkout@v4
+    
+    - name: 列出檔案
+      run: |
+        echo "=== 提交的檔案 ==="
+        if [ -d "data-processed" ]; then
+          ls -la data-processed/
+        else
+          echo "data-processed 目錄不存在"
+        fi
+        if [ -d "metadata" ]; then
+          ls -la metadata/
+        else
+          echo "metadata 目錄不存在"
+        fi
+    
+    - name: 設定 R 環境
+      uses: r-lib/actions/setup-r@v2
+      with:
+        r-version: '4.3.0'
+        
+    - name: 安裝系統相依套件
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev
+        
+    - name: 安裝 R 套件
+      run: |
+        install.packages(c(
+          "tidyverse",
+          "forecast", 
+          "jsonlite",
+          "yaml",
+          "testthat"
+        ))
+      shell: Rscript {0}
+      
+    - name: 檢查 R 環境
+      run: |
+        R --version
+        Rscript -e "installed.packages()[,'Package']"
+    
+    - name: 執行資料驗證
+      run: |
+        # 載入驗證函數
+        source("validation/validate_forecast.R")
+        
+        # 找出所有 CSV 檔案
+        csv_files <- list.files(
+          "data-processed", 
+          pattern = "\\.csv$", 
+          recursive = TRUE,
+          full.names = TRUE
+        )
+        
+        # 驗證每個檔案
+        if (length(csv_files) > 0) {
+          for (file in csv_files) {
+            cat("驗證檔案:", file, "\n")
+            validate_forecast(file)
+            cat("✓ 通過驗證\n\n")
+          }
+        } else {
+          cat("沒有找到 CSV 檔案\n")
+        }
+      shell: Rscript {0}
+    
+    - name: 驗證 Metadata
+      run: |
+        library(yaml)
+        
+        # 找出所有 yaml 檔案
+        yaml_files <- list.files(
+          "metadata", 
+          pattern = "\\.ya?ml$", 
+          full.names = TRUE
+        )
+        
+        if (length(yaml_files) > 0) {
+          for (file in yaml_files) {
+            cat("檢查 metadata:", file, "\n")
+            
+            # 讀取 YAML
+            meta <- read_yaml(file)
+            
+            # 檢查必要欄位
+            required <- c("team_name", "model_name", 
+                         "methods", "data_inputs")
+            missing <- setdiff(required, names(meta))
+            
+            if (length(missing) > 0) {
+              stop(paste("Metadata 缺少:", 
+                        paste(missing, collapse = ", ")))
+            }
+            
+            cat("✓ Metadata 完整\n\n")
+          }
+        } else {
+          cat("沒有找到 YAML 檔案\n")
+        }
+      shell: Rscript {0}
+    
+    - name: 驗證並產生報告
+      id: validation
+      run: |
+        tryCatch({
+          source("validation/run_all_checks.R")
+          run_all_checks()
+          cat("✅ 所有檢查通過！") 
+          cat("status=success" >> "$GITHUB_OUTPUT")
+        }, error = function(e) {
+          cat("❌ 驗證失敗：", e$message)
+          cat("status=failure" >> "$GITHUB_OUTPUT")
+          quit(status = 1)
+        })
+      shell: Rscript {0}
+      continue-on-error: true
+      
+    - name: 評論 PR 結果
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const status = '${{ steps.validation.outputs.status }}';
+          const emoji = status === 'success' ? '✅' : '❌';
+          const title = status === 'success' ? '驗證通過！' : '驗證失敗';
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## ${emoji} ${title}\n\n請查看 Actions 日誌了解詳細資訊。`
+          });

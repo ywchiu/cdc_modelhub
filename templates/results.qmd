@@ -1,0 +1,121 @@
+---
+title: "預測結果儀表板"
+format:
+  html:
+    page-layout: full
+---
+
+## 即時預測比較
+
+```{r}
+#| echo: false
+library(DT)
+library(tidyverse)
+
+# 載入資料
+if (file.exists("data/model_performance.csv")) {
+  results <- read_csv("data/model_performance.csv", show_col_types = FALSE)
+  
+  # 互動式表格
+  datatable(results,
+            options = list(
+              pageLength = 10,
+              language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Chinese-traditional.json')
+            ),
+            filter = 'top',
+            rownames = FALSE) %>%
+    formatRound(columns = c('MAE', 'RMSE'), digits = 2) %>%
+    formatStyle('Score',
+                background = styleColorBar(results$Score, 'lightblue'),
+                backgroundSize = '100% 90%',
+                backgroundRepeat = 'no-repeat',
+                backgroundPosition = 'center')
+} else {
+  cat("模型效能資料檔案不存在")
+}
+```
+
+## 歷史趨勢分析
+
+```{r}
+#| echo: false
+
+if (file.exists("data/latest_forecasts.csv")) {
+  forecasts <- read_csv("data/latest_forecasts.csv", show_col_types = FALSE)
+  
+  if (nrow(forecasts) > 0) {
+    # 時間序列圖表
+    trend_data <- forecasts %>%
+      filter(type == "point") %>%
+      mutate(
+        team = str_extract(repository, "(?<=forecast-\\d{4}-W\\d{2}-).*"),
+        week = str_extract(repository, "W\\d{2}")
+      ) %>%
+      group_by(team, target_end_date) %>%
+      summarise(avg_prediction = mean(value, na.rm = TRUE), .groups = "drop")
+    
+    if (nrow(trend_data) > 0) {
+      plot_ly(trend_data, 
+              x = ~as.Date(target_end_date), 
+              y = ~avg_prediction,
+              color = ~team,
+              type = 'scatter',
+              mode = 'lines+markers') %>%
+        layout(title = "各團隊預測趨勢",
+               xaxis = list(title = "日期"),
+               yaxis = list(title = "平均預測值"))
+    }
+  }
+}
+```
+
+## 模型效能排行
+
+```{r}
+#| echo: false
+
+if (file.exists("data/model_performance.csv")) {
+  results <- read_csv("data/model_performance.csv", show_col_types = FALSE)
+  
+  if (nrow(results) > 0) {
+    # 效能排行圖
+    top_models <- results %>%
+      arrange(desc(Score)) %>%
+      head(10)
+    
+    plot_ly(top_models,
+            x = ~reorder(team, Score),
+            y = ~Score,
+            type = 'bar',
+            marker = list(color = 'steelblue')) %>%
+      layout(title = "模型效能排行榜 (Top 10)",
+             xaxis = list(title = "團隊"),
+             yaxis = list(title = "效能分數"))
+  }
+}
+```
+
+## 資料提交統計
+
+```{r}
+#| echo: false
+
+if (file.exists("data/forecast_summary.csv")) {
+  summary_data <- read_csv("data/forecast_summary.csv", show_col_types = FALSE)
+  
+  if (nrow(summary_data) > 0) {
+    datatable(summary_data,
+              options = list(
+                pageLength = 15,
+                language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Chinese-traditional.json')
+              ),
+              colnames = c('Repository', '資料筆數', '日期範圍', '最後更新'),
+              rownames = FALSE) %>%
+      formatDate('last_update', method = 'toLocaleDateString')
+  }
+}
+```
+
+---
+
+*資料更新時間: `r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`*

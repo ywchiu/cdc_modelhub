@@ -1,0 +1,87 @@
+---
+title: "台灣傳染病預測模型平台"
+subtitle: "集結全國頂尖研究團隊，共同守護民眾健康"
+---
+
+## 🎯 平台簡介
+
+本平台由疾病管制署建立，旨在整合全國傳染病預測模型，
+提供即時、準確的疫情預測資訊。
+
+## 📊 最新預測
+
+```{r}
+#| echo: false
+#| message: false
+
+library(tidyverse)
+library(plotly)
+
+# 讀取最新預測資料
+if (file.exists("data/latest_forecasts.csv")) {
+  forecasts <- read_csv("data/latest_forecasts.csv", show_col_types = FALSE)
+  
+  # 建立互動圖表
+  if (nrow(forecasts) > 0) {
+    plot_ly(forecasts %>% filter(type == "point"), 
+            x = ~as.Date(target_end_date), 
+            y = ~value,
+            color = ~repository,
+            type = 'scatter',
+            mode = 'lines+markers') %>%
+      layout(title = "各團隊預測結果",
+             xaxis = list(title = "預測日期"),
+             yaxis = list(title = "預測病例數"))
+  } else {
+    cat("目前沒有預測資料")
+  }
+} else {
+  cat("預測資料檔案不存在")
+}
+```
+
+## 🏆 參與團隊
+
+- 國立台灣大學公衛學院
+- 國立成功大學統計系  
+- 中央研究院統計所
+- 國立清華大學統計所
+- 國立陽明交通大學生科系
+
+## 📈 平台特色
+
+:::{.grid}
+
+:::{.g-col-4}
+### 🤖 自動化驗證
+所有提交的模型都會經過自動化驗證流程，確保資料品質與格式一致性。
+:::
+
+:::{.g-col-4}
+### 🌐 即時展示
+預測結果會即時更新到網站上，提供最新的疫情預測資訊。
+:::
+
+:::{.g-col-4}
+### 📊 透明公開
+所有程式碼、資料與分析過程都公開透明，符合開放科學精神。
+:::
+
+:::
+
+## 📋 如何參與
+
+1. **註冊 GitHub 帳號** - 取得平台存取權限
+2. **聯繫管理員** - 申請加入建模團隊
+3. **遵循提交規範** - 按照標準格式提交預測結果
+4. **參與協作** - 與其他團隊交流分享經驗
+
+## 📞 聯絡資訊
+
+- **平台管理員**: admin@cdc.gov.tw
+- **技術支援**: tech-support@cdc.gov.tw  
+- **GitHub Organization**: https://github.com/cdc-modeling-hub
+
+---
+
+*最後更新時間: `r format(Sys.time(), "%Y-%m-%d %H:%M:%S")`*
