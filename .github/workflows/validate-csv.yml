@@ -1,0 +1,20 @@
+name: Validate CSV
+
+on:
+  push:
+    paths:
+      - 'data/**/*.csv'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install pandas
+        run: pip install pandas
+      
+      - name: Validate CSV files
+        run: python validate_csv.py
