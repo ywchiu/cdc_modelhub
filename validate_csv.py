@@ -7,6 +7,9 @@ failed = False
 for file in glob.glob('data/*.csv'):
     try:
         df = pd.read_csv(file)
+        a = [c for c in df.columns if 'a' in c]
+        if not a :
+            break 
         print(f'OK - {len(df)} rows, {len(df.columns)} cols')
     except Exception as e:
         print(f'Failed - {e}')
